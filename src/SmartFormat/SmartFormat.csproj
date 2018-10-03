@@ -39,6 +39,9 @@
     <AssemblyOriginatorKeyFile>SmartFormat.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=11.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.11.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -69,11 +72,14 @@
     <Compile Include="Core\Settings\CaseSensitivityType.cs" />
     <Compile Include="Core\Settings\ErrorAction.cs" />
     <Compile Include="Core\Settings\SmartSettings.cs" />
+    <Compile Include="Extensions\SubStringFormatter.cs" />
+    <Compile Include="Extensions\IsMatchFormatter.cs" />
     <Compile Include="Extensions\ChooseFormatter.cs" />
     <Compile Include="Extensions\ConditionalFormatter.cs" />
     <Compile Include="Extensions\DefaultFormatter.cs" />
     <Compile Include="Extensions\DefaultSource.cs" />
     <Compile Include="Extensions\DictionarySource.cs" />
+    <Compile Include="Extensions\JsonSource.cs" />
     <Compile Include="Extensions\ListFormatter.cs" />
     <Compile Include="Extensions\PluralLocalizationFormatter.cs" />
     <Compile Include="Extensions\ReflectionSource.cs" />
@@ -89,10 +95,10 @@
     <Compile Include="SmartObjects.cs" />
     <Compile Include="Utilities\FormatDelegate.cs" />
     <Compile Include="Utilities\PluralRules.cs" />
-    <Compile Include="Utilities\PluralRules_Old.cs" />
     <Compile Include="Utilities\TimeSpanUtility.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="SmartFormat.snk" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

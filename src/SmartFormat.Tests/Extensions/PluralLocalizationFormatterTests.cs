@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Globalization;
 using NUnit.Framework;
+using SmartFormat.Extensions;
+using SmartFormat.Utilities;
 using ExpectedResults = System.Collections.Generic.Dictionary<decimal, string>;
 
 namespace SmartFormat.Tests.Extensions
@@ -53,6 +55,43 @@ namespace SmartFormat.Tests.Extensions
                     {   2, "There are 2 items remaining"},
                     {  11, "There are 11 items remaining"},
                 });
+        }
+
+        [Test]
+        public void Test_English_Unsigned()
+        {
+            /**
+             * Different pattern for this test because simply casting ints to u* types
+             * for use in TestCase or ExpectedResults will pass with the old code
+             * but actually declaring them as u* doesn't.
+             */
+
+            const string format = "There {0:plural(en):is|are} {0} {0:plural(en):item|items} remaining";
+
+            var expectedResults = new[]
+            {
+                "There are 0 items remaining",
+                "There is 1 item remaining",
+                "There are 2 items remaining"
+            };
+
+            for (ushort i = 0; i < expectedResults.Length; i++)
+            {
+                var actualResult = Smart.Format(format, i);
+                Assert.AreEqual(expectedResults[i], actualResult);
+            }
+
+            for (uint i = 0; i < expectedResults.Length; i++)
+            {
+                var actualResult = Smart.Format(format, i);
+                Assert.AreEqual(expectedResults[i], actualResult);
+            }
+
+            for (ulong i = 0; i < (ulong)expectedResults.Length; i++)
+            {
+                var actualResult = Smart.Format(format, i);
+                Assert.AreEqual(expectedResults[i], actualResult);
+            }
         }
 
         [Test]
@@ -165,6 +204,19 @@ namespace SmartFormat.Tests.Extensions
             var culture = new CultureInfo("en-US");
             var actualResult = Smart.Format(culture, format, arg0);
             Assert.AreEqual(expectedResult, actualResult);
+        }
+
+        [Test]
+        public void Test_With_CustomPluralRuleProvider()
+        {
+            var actualResult = Smart.Format(new CustomPluralRuleProvider(PluralRules.GetPluralRule("de")), "{0:plural:Frau|Frauen}", new string[2], "more");
+            Assert.AreEqual("Frauen", actualResult);
+
+            actualResult = Smart.Format(new CustomPluralRuleProvider(PluralRules.GetPluralRule("en")), "{0:plural:person|people}", new string[2], "more");
+            Assert.AreEqual("people", actualResult);
+
+            actualResult = Smart.Format(new CustomPluralRuleProvider(PluralRules.GetPluralRule("en")), "{0:plural:person|people}", new string[1], "one");
+            Assert.AreEqual("person", actualResult);
         }
     }
 }
