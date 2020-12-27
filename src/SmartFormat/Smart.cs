@@ -1,4 +1,9 @@
-﻿using System;
+﻿//
+// Copyright (C) axuno gGmbH, Scott Rippey, Bernhard Millauer and other contributors.
+// Licensed under the MIT license.
+//
+
+using System;
 using SmartFormat.Core.Extensions;
 using SmartFormat.Extensions;
 
@@ -72,6 +77,8 @@ namespace SmartFormat
             formatter.AddExtensions(
                 (ISource) listFormatter, // ListFormatter MUST be first
                 new DictionarySource(formatter),
+                new ValueTupleSource(formatter),
+                new SmartObjectsSource(formatter),
                 new JsonSource(formatter),
                 new XmlSource(formatter),
                 new ReflectionSource(formatter),

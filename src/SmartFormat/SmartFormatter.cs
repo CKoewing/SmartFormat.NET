@@ -1,4 +1,9 @@
-﻿using System;
+﻿//
+// Copyright (C) axuno gGmbH, Scott Rippey, Bernhard Millauer and other contributors.
+// Licensed under the MIT license.
+//
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using SmartFormat.Core.Extensions;
@@ -6,6 +11,7 @@ using SmartFormat.Core.Formatting;
 using SmartFormat.Core.Output;
 using SmartFormat.Core.Parsing;
 using SmartFormat.Core.Settings;
+using SmartFormat.Utilities;
 
 namespace SmartFormat
 {
@@ -32,12 +38,6 @@ namespace SmartFormat
             Parser = new Parser(Settings);
             SourceExtensions = new List<ISource>();
             FormatterExtensions = new List<IFormatter>();
-        }
-
-        [Obsolete("Depreciated. Use the FormatterErrorAction property in Settings instead.", false)]
-        public SmartFormatter(ErrorAction errorAction = ErrorAction.Ignore) : this()
-        {
-            Settings.FormatErrorAction = errorAction;
         }
 
         #endregion
@@ -93,10 +93,10 @@ namespace SmartFormat
         /// Returns null if the type cannot be found.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        /// <returns>Returns a Source Extension or <see langword="null" />, if the type cannot be found.</returns>
         public T GetSourceExtension<T>() where T : class, ISource
         {
-            return SourceExtensions.OfType<T>().First();
+            return SourceExtensions.OfType<T>().FirstOrDefault();
         }
 
         /// <summary>
@@ -105,10 +105,10 @@ namespace SmartFormat
         /// Returns null if the type cannot be found.
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <returns></returns>
+        /// <returns>Returns a Formatter Extension or <see langword="null" />, if the type cannot be found.</returns>
         public T GetFormatterExtension<T>() where T : class, IFormatter
         {
-            return FormatterExtensions.OfType<T>().First();
+            return FormatterExtensions.OfType<T>().FirstOrDefault();
         }
 
         #endregion
@@ -119,16 +119,6 @@ namespace SmartFormat
         /// Gets or set the instance of the <see cref="Core.Parsing.Parser" />
         /// </summary>
         public Parser Parser { get; }
-
-        /// <summary>
-        /// Gets or set the <see cref="Core.Settings.ErrorAction" /> for the formatter.
-        /// </summary>
-        [Obsolete("Depreciated. Use the FormatterErrorAction property in Settings instead.", false)]
-        public ErrorAction ErrorAction
-        {
-            get => Settings.FormatErrorAction;
-            set => Settings.FormatErrorAction = value;
-        }
 
         /// <summary>
         /// Get the <see cref="Core.Settings.SmartSettings" /> for Smart.Format
@@ -144,19 +134,19 @@ namespace SmartFormat
         /// </summary>
         /// <param name="format">A composite format string.</param>
         /// <param name="args">The object to format.</param>
-        /// <returns>Returns the formated input with items replaced with their string representation.</returns>
+        /// <returns>Returns the formatted input with items replaced with their string representation.</returns>
         public string Format(string format, params object[] args)
         {
             return Format(null, format, args ?? new object[] {null});
         }
 
         /// <summary>
-        /// Replaces one or more format items in as specified string with the string representation of a specific object.
+        /// Replaces one or more format items in a specified string with the string representation of a specific object.
         /// </summary>
         /// <param name="provider">The <see cref="IFormatProvider" /> to use.</param>
         /// <param name="format">A composite format string.</param>
         /// <param name="args">The object to format.</param>
-        /// <returns>Returns the formated input with items replaced with their string representation.</returns>
+        /// <returns>Returns the formatted input with items replaced with their string representation.</returns>
         public string Format(IFormatProvider provider, string format, params object[] args)
         {
             args = args ?? new object[] {null};
@@ -169,6 +159,12 @@ namespace SmartFormat
             return output.ToString();
         }
 
+        /// <summary>
+        /// Writes the formatting result into an <see cref="IOutput"/> instance.
+        /// </summary>
+        /// <param name="output">The <see cref="IOutput"/> where the result is written to.</param>
+        /// <param name="format">The format string.</param>
+        /// <param name="args">The objects to format.</param>
         public void FormatInto(IOutput output, string format, params object[] args)
         {
             args = args ?? new object[] {null};
@@ -178,6 +174,14 @@ namespace SmartFormat
             Format(formatDetails, formatParsed, current);
         }
 
+        /// <summary>
+        /// Replaces one or more format items in a specified string with the string representation of a specific object,
+        /// using the <see cref="FormatCache"/>.
+        /// </summary>
+        /// <param name="cache">The <see cref="FormatCache" /> to use.</param>
+        /// <param name="format">A composite format string.</param>
+        /// <param name="args">The objects to format.</param>
+        /// <returns>Returns the formatted input with items replaced with their string representation.</returns>
         public string FormatWithCache(ref FormatCache cache, string format, params object[] args)
         {
             args = args ?? new object[] {null};
@@ -192,6 +196,13 @@ namespace SmartFormat
             return output.ToString();
         }
 
+        /// <summary>
+        /// Writes the formatting result into an <see cref="IOutput"/> instance, using the <see cref="FormatCache"/>.
+        /// </summary>
+        /// <param name="cache">The <see cref="FormatCache"/> to use.</param>
+        /// <param name="output">The <see cref="IOutput"/> where the result is written to.</param>
+        /// <param name="format">The format string.</param>
+        /// <param name="args">The objects to format.</param>
         public void FormatWithCacheInto(ref FormatCache cache, IOutput output, string format, params object[] args)
         {
             args = args ?? new object[] {null};
@@ -213,7 +224,7 @@ namespace SmartFormat
         #region: Format :
 
         /// <summary>
-        /// Format the input given in parameter <see cref="FormattingInfo" />.
+        /// Format the <see cref="FormattingInfo" /> argument.
         /// </summary>
         /// <param name="formattingInfo"></param>
         public void Format(FormattingInfo formattingInfo)
@@ -222,8 +233,7 @@ namespace SmartFormat
             CheckForExtensions();
             foreach (var item in formattingInfo.Format.Items)
             {
-                var literalItem = item as LiteralText;
-                if (literalItem != null)
+                if (item is LiteralText literalItem)
                 {
                     formattingInfo.Write(literalItem.ToString());
                     continue;
@@ -238,7 +248,7 @@ namespace SmartFormat
                 }
                 catch (Exception ex)
                 {
-                    // An error occurred while evalation selectors
+                    // An error occurred while evaluation selectors
                     var errorIndex = placeholder.Format?.startIndex ?? placeholder.Selectors.Last().endIndex;
                     FormatError(item, ex, errorIndex, childFormattingInfo);
                     continue;
@@ -329,28 +339,8 @@ namespace SmartFormat
         {
             foreach (var sourceExtension in SourceExtensions)
             {
-                // if the current value is of type SmartObjects
-                // then try to find the right source extension for each of the objects in SmartObjects
-                // Note: SmartObjects cannot be nested, so this can be the case only once. 
-                var smartObjects = formattingInfo.CurrentValue as SmartObjects;
-                if (smartObjects != null)
-                {
-                    var savedCurrentValue = formattingInfo.CurrentValue;
-                    foreach (var obj in smartObjects)
-                    {
-                        formattingInfo.CurrentValue = obj;
-                        var handled = sourceExtension.TryEvaluateSelector(formattingInfo);
-                        if (handled) return true;
-                    }
-
-                    formattingInfo.CurrentValue = savedCurrentValue;
-                }
-                else
-                {
-                    // other object - default handling
-                    var handled = sourceExtension.TryEvaluateSelector(formattingInfo);
-                    if (handled) return true;
-                }
+                var handled = sourceExtension.TryEvaluateSelector(formattingInfo);
+                if (handled) return true;
             }
 
             return false;

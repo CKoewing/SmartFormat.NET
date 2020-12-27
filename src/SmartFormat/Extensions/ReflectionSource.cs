@@ -1,4 +1,9 @@
-﻿using System.Linq;
+﻿//
+// Copyright (C) axuno gGmbH, Scott Rippey, Bernhard Millauer and other contributors.
+// Licensed under the MIT license.
+//
+
+using System.Linq;
 using System.Reflection;
 using SmartFormat.Core.Extensions;
 
@@ -60,8 +65,8 @@ namespace SmartFormat.Extensions
                             method = (MethodInfo) member;
                         }
 
-                        //  Check that this method is valid -- it needs to return a value and has to be parameterless:
-                        //  We are only looking for a parameterless Function/Property:
+                        //  Check that this method is valid -- it needs to return a value and has to be parameter-less:
+                        //  We are only looking for a parameter-less Function/Property:
                         if (method.GetParameters().Length > 0) continue;
 
                         //  Make sure that this method is not void!  It has to be a Function!

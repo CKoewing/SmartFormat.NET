@@ -1,4 +1,9 @@
-﻿using System;
+﻿//
+// Copyright (C) axuno gGmbH, Scott Rippey, Bernhard Millauer and other contributors.
+// Licensed under the MIT license.
+//
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -180,31 +185,6 @@ namespace SmartFormat.Utilities
         #endregion
 
         #region: TimeSpan Rounding :
-
-        /// <summary>
-        /// <para>Returns the largest <c>TimeSpan</c> less than or equal to the specified interval.</para>
-        /// <para>For example: <c>Floor("00:57:00", TimeSpan.TicksPerMinute * 5) =&gt; "00:55:00"</c></para>
-        /// </summary>
-        /// <param name="FromTime">A <c>TimeSpan</c> to be rounded.</param>
-        /// <param name="intervalTicks">Specifies the interval for rounding.  Use <c>TimeSpan.TicksPer____</c>.</param>
-        public static TimeSpan Floor(this TimeSpan FromTime, long intervalTicks)
-        {
-            var extra = FromTime.Ticks % intervalTicks;
-            return TimeSpan.FromTicks(FromTime.Ticks - extra);
-        }
-
-        /// <summary>
-        /// <para>Returns the smallest <c>TimeSpan</c> greater than or equal to the specified interval.</para>
-        /// <para>For example: <c>Ceiling("00:57:00", TimeSpan.TicksPerMinute * 5) =&gt; "01:00:00"</c></para>
-        /// </summary>
-        /// <param name="FromTime">A <c>TimeSpan</c> to be rounded.</param>
-        /// <param name="intervalTicks">Specifies the interval for rounding.  Use <c>TimeSpan.TicksPer____</c>.</param>
-        public static TimeSpan Ceiling(this TimeSpan FromTime, long intervalTicks)
-        {
-            var extra = FromTime.Ticks % intervalTicks;
-            if (extra == 0) return FromTime;
-            return TimeSpan.FromTicks(FromTime.Ticks - extra + intervalTicks);
-        }
 
         /// <summary>
         /// <para>Returns the <c>TimeSpan</c> closest to the specified interval.</para>
@@ -536,7 +516,7 @@ namespace SmartFormat.Utilities
             this.lessThan = lessThan;
         }
 
-        private static string getValue(PluralRules.PluralRuleDelegate pluralRule, int value, string[] units)
+        private static string GetValue(PluralRules.PluralRuleDelegate pluralRule, int value, string[] units)
         {
             // Get the plural index from the plural rule,
             // unless there's only 1 unit in the first place:
@@ -554,17 +534,17 @@ namespace SmartFormat.Utilities
             switch (unit)
             {
                 case TimeSpanFormatOptions.RangeWeeks:
-                    return getValue(PluralRule, value, abbr ? w : week);
+                    return GetValue(PluralRule, value, abbr ? w : week);
                 case TimeSpanFormatOptions.RangeDays:
-                    return getValue(PluralRule, value, abbr ? d : day);
+                    return GetValue(PluralRule, value, abbr ? d : day);
                 case TimeSpanFormatOptions.RangeHours:
-                    return getValue(PluralRule, value, abbr ? h : hour);
+                    return GetValue(PluralRule, value, abbr ? h : hour);
                 case TimeSpanFormatOptions.RangeMinutes:
-                    return getValue(PluralRule, value, abbr ? m : minute);
+                    return GetValue(PluralRule, value, abbr ? m : minute);
                 case TimeSpanFormatOptions.RangeSeconds:
-                    return getValue(PluralRule, value, abbr ? s : second);
+                    return GetValue(PluralRule, value, abbr ? s : second);
                 case TimeSpanFormatOptions.RangeMilliSeconds:
-                    return getValue(PluralRule, value, abbr ? ms : millisecond);
+                    return GetValue(PluralRule, value, abbr ? ms : millisecond);
             }
 
             // (should be unreachable)

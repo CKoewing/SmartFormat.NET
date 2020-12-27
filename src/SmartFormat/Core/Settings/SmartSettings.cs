@@ -1,4 +1,9 @@
-﻿using System;
+﻿//
+// Copyright (C) axuno gGmbH, Scott Rippey, Bernhard Millauer and other contributors.
+// Licensed under the MIT license.
+//
+
+using System;
 using System.Collections.Generic;
 
 namespace SmartFormat.Core.Settings
@@ -12,17 +17,19 @@ namespace SmartFormat.Core.Settings
         {
             CaseSensitivity = CaseSensitivityType.CaseSensitive;
             ConvertCharacterStringLiterals = true;
-            FormatErrorAction = ErrorAction.Ignore;
-            ParseErrorAction = ErrorAction.Ignore;
+            FormatErrorAction = ErrorAction.ThrowError;
+            ParseErrorAction = ErrorAction.ThrowError;
         }
 
         /// <summary>
         /// Gets or sets the <see cref="ErrorAction" /> to apply for the <see cref="SmartFormatter" />.
+        /// The default is <see cref="ErrorAction.ThrowError"/>.
         /// </summary>
         public ErrorAction FormatErrorAction { get; set; }
 
         /// <summary>
         /// Gets or sets the <see cref="ErrorAction" /> to apply for the <see cref="SmartFormat.Core.Parsing.Parser" />.
+        /// The default is <see cref="ErrorAction.ThrowError"/>.
         /// </summary>
         public ErrorAction ParseErrorAction { get; set; }
 
@@ -46,9 +53,9 @@ namespace SmartFormat.Core.Settings
                 switch (CaseSensitivity)
                 {
                     case CaseSensitivityType.CaseSensitive:
-                        return StringComparer.CurrentCulture;
+                        return StringComparer.Ordinal;
                     case CaseSensitivityType.CaseInsensitive:
-                        return StringComparer.CurrentCultureIgnoreCase;
+                        return StringComparer.OrdinalIgnoreCase;
                     default:
                         throw new InvalidOperationException(
                             $"The case sensitivity type [{CaseSensitivity}] is unknown.");
@@ -62,9 +69,9 @@ namespace SmartFormat.Core.Settings
                 switch (CaseSensitivity)
                 {
                     case CaseSensitivityType.CaseSensitive:
-                        return StringComparison.CurrentCulture;
+                        return StringComparison.Ordinal;
                     case CaseSensitivityType.CaseInsensitive:
-                        return StringComparison.CurrentCultureIgnoreCase;
+                        return StringComparison.OrdinalIgnoreCase;
                     default:
                         throw new InvalidOperationException(
                             $"The case sensitivity type [{CaseSensitivity}] is unknown.");

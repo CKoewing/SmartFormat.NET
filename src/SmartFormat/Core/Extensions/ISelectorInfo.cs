@@ -1,4 +1,9 @@
-﻿using System.ComponentModel;
+﻿//
+// Copyright (C) axuno gGmbH, Scott Rippey, Bernhard Millauer and other contributors.
+// Licensed under the MIT license.
+//
+
+using System.ComponentModel;
 using SmartFormat.Core.Formatting;
 using SmartFormat.Core.Parsing;
 

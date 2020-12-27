@@ -1,8 +1,14 @@
-﻿using System;
+﻿//
+// Copyright (C) axuno gGmbH, Scott Rippey, Bernhard Millauer and other contributors.
+// Licensed under the MIT license.
+//
+
+using System;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using SmartFormat.Core.Extensions;
 using SmartFormat.Core.Parsing;
+using SmartFormat.Net.Utilities;
 
 namespace SmartFormat.Extensions
 {
@@ -33,12 +39,13 @@ namespace SmartFormat.Extensions
                 current is byte || current is short || current is int || current is long
                 || current is float || current is double || current is decimal;
             // An Enum is a number too:
-#if NETSTANDARD
+#if !NET45
             if (currentIsNumber == false && current != null && current.GetType().GetTypeInfo().IsEnum)
 #else
             if (currentIsNumber == false && current != null && current.GetType().IsEnum)
 #endif
                 currentIsNumber = true;
+
             var currentNumber = currentIsNumber ? Convert.ToDecimal(current) : 0;
 
             int paramIndex; // Determines which parameter to use for output
@@ -75,8 +82,7 @@ namespace SmartFormat.Extensions
                 // We don't have any "complex conditions",
                 // so let's do the normal conditional formatting:
             }
-
-
+            
             var paramCount = parameters.Count;
 
             // Determine the Current item's Type:
@@ -87,54 +93,53 @@ namespace SmartFormat.Extensions
                 else
                     paramIndex = Math.Min((int) Math.Floor(currentNumber), paramCount - 1);
             }
-            else if (current is bool)
+            else switch (current)
             {
-                // Bool: True|False
-                var arg = (bool) current;
-                if (arg)
-                    paramIndex = 0;
-                else
-                    paramIndex = 1;
-            }
-            else if (current is DateTime)
-            {
+                case bool boolArg:
+                    // Bool: True|False
+                    paramIndex = boolArg ? 0 : 1;
+                    break;
                 // Date: Past|Present|Future   or   Past/Present|Future
-                var arg = (DateTime) current;
-                if (paramCount == 3 && arg.Date == DateTime.Today)
+                case DateTime dateTimeArg when paramCount == 3 && dateTimeArg.ToUniversalTime().Date == SystemTime.Now().ToUniversalTime().Date:
                     paramIndex = 1;
-                else if (arg <= DateTime.Now)
+                    break;
+                case DateTime dateTimeArg when dateTimeArg.ToUniversalTime() <= SystemTime.Now().ToUniversalTime():
                     paramIndex = 0;
-                else
+                    break;
+                case DateTime dateTimeArg:
                     paramIndex = paramCount - 1;
-            }
-            else if (current is TimeSpan)
-            {
+                    break;
+                // Date: Past|Present|Future   or   Past/Present|Future
+                case DateTimeOffset dateTimeOffsetArg when paramCount == 3 && dateTimeOffsetArg.UtcDateTime.Date == SystemTime.OffsetNow().UtcDateTime.Date:
+                    paramIndex = 1;
+                    break;
+                case DateTimeOffset dateTimeOffsetArg when dateTimeOffsetArg.UtcDateTime <= SystemTime.OffsetNow().UtcDateTime:
+                    paramIndex = 0;
+                    break;
+                case DateTimeOffset dateTimeOffsetArg:
+                    paramIndex = paramCount - 1;
+                    break;
                 // TimeSpan: Negative|Zero|Positive  or  Negative/Zero|Positive
-                var arg = (TimeSpan) current;
-                if (paramCount == 3 && arg == TimeSpan.Zero)
+                case TimeSpan timeSpanArg when paramCount == 3 && timeSpanArg == TimeSpan.Zero:
                     paramIndex = 1;
-                else if (arg.CompareTo(TimeSpan.Zero) <= 0)
+                    break;
+                case TimeSpan timeSpanArg when timeSpanArg.CompareTo(TimeSpan.Zero) <= 0:
                     paramIndex = 0;
-                else
+                    break;
+                case TimeSpan timeSpanArg:
                     paramIndex = paramCount - 1;
-            }
-            else if (current is string)
-            {
-                // String: Value|NullOrEmpty
-                var arg = (string) current;
-                if (!string.IsNullOrEmpty(arg))
-                    paramIndex = 0;
-                else
-                    paramIndex = 1;
-            }
-            else
-            {
-                // Object: Something|Nothing
-                var arg = current;
-                if (arg != null)
-                    paramIndex = 0;
-                else
-                    paramIndex = 1;
+                    break;
+                case string stringArg:
+                    // String: Value|NullOrEmpty
+                    paramIndex = !string.IsNullOrEmpty(stringArg) ? 0 : 1;
+                    break;
+                default:
+                {
+                    // Object: Something|Nothing
+                    var arg = current;
+                    paramIndex = arg != null ? 0 : 1;
+                    break;
+                }
             }
 
             // Now, output the selected parameter:
